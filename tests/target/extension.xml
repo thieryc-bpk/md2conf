@@ -14,12 +14,9 @@
 └── Project]]></ac:plain-text-body>
 </ac:structured-macro>
 <h2>PlantUML</h2>
-<ac:structured-macro ac:name="code" ac:schema-version="1">
-  <ac:parameter ac:name="language">none</ac:parameter>
-  <ac:plain-text-body><![CDATA[@startuml
-:User: --> (Login)
-:User: --> (Browse Products)
-:Admin: --> (Manage Inventory)
-(Manage Inventory) ..> (Browse Products) : includes
-@enduml]]></ac:plain-text-body>
+<ac:structured-macro ac:name="plantumlcloud" ac:schema-version="1" data-layout="default" ac:local-id="UUID" ac:macro-id="UUID">
+  <ac:parameter ac:name="data">UzUxKC5JLCopzc1RNXBUNXYMLU4tAlKqRga6uqrGrkBa1cjCJz89M0/VyBKPEqei/PLiVCA7oCg/pTS5pBiu3DElF6gZXb1vYl5iOki9Z15Zal5JflElVAMuKSMDPT38tgFlwLZk5iXnlKakFoNMMzFIzUsBeg4A</ac:parameter>
+  <ac:parameter ac:name="compressed">true</ac:parameter>
+  <ac:parameter ac:name="revision">1</ac:parameter>
+  <ac:parameter ac:name="toolbar">bottom</ac:parameter>
 </ac:structured-macro>

@@ -17,14 +17,18 @@ from pathlib import Path
 from md2conf.attachment import attachment_name
 from md2conf.collection import ConfluencePageCollection, ConfluenceUserCollection
 from md2conf.compatibility import override
-from md2conf.converter import ConfluenceDocument
+from md2conf.converter import ConfluenceDocument, ConfluenceStorageFormatConverter
 from md2conf.csf import canonicalize
+from md2conf.drawio.extension import DrawioExtension
 from md2conf.latex import LATEX_ENABLED
 from md2conf.matcher import Matcher, MatcherOptions
+from md2conf.mermaid.confluence_macro import ConfluenceMermaidMacroExtension
+from md2conf.mermaid.extension import MermaidExtension
 from md2conf.mermaid.render import has_mmdc
 from md2conf.metadata import ConfluenceSiteMetadata
 from md2conf.options import Markdown, ProcessorOptions
 from md2conf.options_converter import ConverterOptions, ImageLayoutOptions, LayoutOptions
+from md2conf.plantuml.extension import PlantUMLExtension
 from md2conf.plantuml.render import compress_plantuml_data, has_plantuml, render_diagram
 from md2conf.svg import get_svg_dimensions
 from tests import emoji
@@ -238,13 +242,23 @@ class TestConversion(TypedTestCase):
 
         self.assertEqual(actual, expected)
 
+    def test_bundled_mermaid_selection(self) -> None:
+        for options, mermaid_type in (
+            (ConverterOptions(), MermaidExtension),
+            (ConverterOptions(mermaid_macro="confluence"), ConfluenceMermaidMacroExtension),
+        ):
+            with self.subTest(mermaid_macro=options.mermaid_macro):
+                converter = ConfluenceStorageFormatConverter(options, self.source_dir / "extension.md", self.source_dir, self.site_metadata)
+                self.assertEqual([type(extension) for extension in converter.extensions], [DrawioExtension, mermaid_type, PlantUMLExtension])
+
     def test_extension(self) -> None:
         _, doc = ConfluenceDocument.create(
             self.source_dir / "extension.md",
             ProcessorOptions(
                 converter=ConverterOptions(
-                    # disable default extensions, register a custom hook for Mermaid
-                    extensions=[MermaidTreeExtensionFactory()]
+                    # register a custom hook for Mermaid, default extensions remain active for other diagrams
+                    extensions=[MermaidTreeExtensionFactory()],
+                    render_plantuml=False,
                 )
             ),
             self.source_dir,

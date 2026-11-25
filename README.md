@@ -773,7 +773,19 @@ When *md2conf* encounters an image reference (e.g. `*.mmd` file) or a fenced cod
 
 When developing your own integration, you might first want to add the Marketplace app widget to a Confluence page by hand using the GUI, publish changes, and then click *Advanced details* > *View storage format* to inspect the underlying Confluence Storage Format code.
 
-Registering custom extensions will disable the default draw\.io, Mermaid and PlantUML integrations that come bundled with *md2conf*.
+Custom extensions are tried before the default draw\.io, Mermaid and PlantUML integrations that come bundled with *md2conf*, which remain active. A custom extension therefore takes precedence for the types of diagram it handles.
+
+The `--mermaid-macro` option selects the bundled Mermaid integration (`cloud` or `confluence`) without changing draw\.io or PlantUML. To emit the Data Center macro instead of a pre-rendered image, use `--mermaid-macro confluence --no-render-mermaid`.
+
+For example, to store Mermaid diagrams with the Data Center / Server app *Mermaid for Confluence* (macro `confluence-mermaid-macro`) instead of the Cloud macro `mermaid-cloud`, register the bundled extension factory:
+
+```python
+from md2conf.mermaid.confluence_macro import ConfluenceMermaidMacroExtensionFactory
+
+ConverterOptions(extensions=[ConfluenceMermaidMacroExtensionFactory()], render_other=False)
+```
+
+Setting `render_other` to `False` stores the diagram source in the macro body; the app renders it when the page is viewed. The bundled draw\.io, Mermaid and PlantUML integrations remain active for other diagrams.
 
 ### Running the tool
 
@@ -858,6 +870,8 @@ options:
   --no-render-other     Upload other diagram sources as Confluence page attachments. (Marketplace app required to display.)
   --diagram-output-format {png,svg}
                         Format for rendering Mermaid and draw.io diagrams. (default: png)
+  --mermaid-macro {cloud,confluence}
+                        Macro for Mermaid diagrams: `cloud` (Mermaid Cloud) or `confluence` (Mermaid for Confluence Data Center app). (default: cloud)
   --webui-links         Enable Confluence Web UI links. (Typically required for on-prem versions of Confluence.)
   --no-webui-links      Use hierarchical links including space and page ID. (default)
   --task-lists          Transform GitHub/GitLab-style task lists into Confluence task list objects. (default)
@@ -934,6 +948,7 @@ options = ProcessorOptions(
         render_latex=bool(),
         render_other=bool(),
         diagram_output_format='png' or 'svg',
+        mermaid_macro='cloud' or 'confluence',
         webui_links=bool(),
         task_lists=bool(),
         user_mentions=bool(),

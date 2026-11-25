@@ -34,6 +34,7 @@ from .formatting import FormattingContext, ImageAlignment, ImageAttributes
 from .image import DefaultImageGenerator, to_element_attrs
 from .latex import render_latex
 from .markdown import markdown_to_html, markdown_with_line_numbers
+from .mermaid.confluence_macro import ConfluenceMermaidMacroExtensionFactory
 from .mermaid.extension import MermaidExtensionFactory
 from .metadata import ConfluenceSiteMetadata
 from .options import ConfluencePageID, ProcessorOptions
@@ -537,15 +538,13 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
             ImageGeneratorOptions(self.options.diagram_output_format, self.options.prefer_raster, self.options.layout.image.max_width),
         )
 
-        if options.extensions is not None:
-            self.extensions = [factory.create(self.image_generator, ExtensionOptions(render=self.options.render_other)) for factory in options.extensions]
-        else:
-            extensions: Sequence[MarketplaceExtension] = [
-                DrawioExtensionFactory().create(self.image_generator, ExtensionOptions(render=self.options.render_drawio)),
-                MermaidExtensionFactory().create(self.image_generator, ExtensionOptions(render=self.options.render_mermaid)),
-                PlantUMLExtensionFactory().create(self.image_generator, ExtensionOptions(render=self.options.render_plantuml)),
-            ]
-            self.extensions = extensions
+        mermaid_factory = ConfluenceMermaidMacroExtensionFactory() if options.mermaid_macro == "confluence" else MermaidExtensionFactory()
+        self.extensions = [
+            *(factory.create(self.image_generator, ExtensionOptions(render=options.render_other)) for factory in (options.extensions or [])),
+            DrawioExtensionFactory().create(self.image_generator, ExtensionOptions(render=options.render_drawio)),
+            mermaid_factory.create(self.image_generator, ExtensionOptions(render=options.render_mermaid)),
+            PlantUMLExtensionFactory().create(self.image_generator, ExtensionOptions(render=options.render_plantuml)),
+        ]
 
     def _transform_heading(self, heading: ElementType) -> None:
         """

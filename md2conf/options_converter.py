@@ -157,6 +157,10 @@ class ConverterOptions:
         default="png",
         metadata=value_option("Format for rendering Mermaid and draw.io diagrams."),
     )
+    mermaid_macro: Literal["cloud", "confluence"] = field(
+        default="cloud",
+        metadata=value_option("Macro for Mermaid diagrams: `cloud` (Mermaid Cloud) or `confluence` (Mermaid for Confluence Data Center app)."),
+    )
     webui_links: bool = field(
         default=False,
         metadata=boolean_option(
